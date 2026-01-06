@@ -1,0 +1,753 @@
+{
+  "name": "gemini automation copy",
+  "nodes": [
+    {
+      "parameters": {
+        "sendTo": "={{ $('Prepare Student Data').item.json.email }}",
+        "subject": "={{ $json.subject || 'Scholarship Application Update' }}",
+        "emailType": "text",
+        "message": "={{ $json.body || 'Please check your application status.' }}",
+        "options": {}
+      },
+      "id": "f474800b-ba6a-4e90-8d57-2b1e543c754e",
+      "name": "Send Student Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -656,
+        320
+      ],
+      "webhookId": "e81a5055-06d0-4801-99da-5ea19ed60ec9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "W6a0AzCq07eYqhV9",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Prepare Student Data').item.json.email }}",
+        "subject": "={{ $json.subject || 'Scholarship Verification Required' }}",
+        "emailType": "text",
+        "message": "={{ $json.body || 'Please verify the student application.' }}",
+        "options": {}
+      },
+      "id": "3c43ebe3-f4cd-414c-8da3-52ee300cb0b2",
+      "name": "Send Admin Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -656,
+        512
+      ],
+      "webhookId": "09107291-d015-4182-892f-459338a102c2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "W6a0AzCq07eYqhV9",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1BEmfDHSCmMsuWT38tFSCuMbHTDwp391VgeriFGeU2HY",
+          "mode": "list",
+          "cachedResultName": "Scholarship Application Responses",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BEmfDHSCmMsuWT38tFSCuMbHTDwp391VgeriFGeU2HY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1079604647,
+          "mode": "list",
+          "cachedResultName": "Form responses 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BEmfDHSCmMsuWT38tFSCuMbHTDwp391VgeriFGeU2HY/edit#gid=1079604647"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "id": "85224f0c-bf48-422f-a763-0473ddd32d69",
+      "name": "New Scholarship Application",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2128,
+        512
+      ],
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "rSXzz8cDxehZMyMi",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": []
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "37b438d1-4655-4c69-9a22-8996c5810cf3",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1904,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "Document Pending",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "688c84bd-63d4-4407-af7c-fe383f7ce8a7"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Document Pending"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "Institute Verification Pending",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "dd2391da-65f0-4919-a0a1-95fbbfc0cbde"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Institute Verification Pending"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "Approved",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "0a07151e-4301-4052-950f-97bf07d382ac"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Approved"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "64c20d9d-02ca-4116-89fa-ff0a3df755d7",
+      "name": "Route by Scholarship Status",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -1232,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Prepare Student Data').item.json.email }}",
+        "subject": "={{ $json.subject || 'Scholarship Approved - Congratulations!' }}",
+        "emailType": "text",
+        "message": "={{ $json.body || 'Your scholarship has been approved.' }}",
+        "options": {}
+      },
+      "id": "4dce28f1-ff17-4f6f-b9ee-1addc73aaf56",
+      "name": "Send Approval Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -656,
+        704
+      ],
+      "webhookId": "a84aacc9-39af-43cb-bd49-53ff4fc91b7f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "W6a0AzCq07eYqhV9",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "name",
+              "value": "={{ $json['Student Name'] || $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "email",
+              "value": "={{ $json['Student Email'] || $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "scholarship_type",
+              "value": "={{ $json['Scholarship Type'] || $json.scholarship_type }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "status",
+              "value": "={{ $json['Scholarship Status'] || $json.status || 'Document Pending' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "email_sent",
+              "value": "={{ $json['Email Sent'] || $json.email_sent || 'NO' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "row_number",
+              "value": "={{ $json.row_number || $json['Row Number'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "96eeabd2-4db6-46c0-b0b9-87b7631d405f",
+      "name": "Prepare Student Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1680,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.email_sent }}",
+              "rightValue": "NO",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b005ecb9-8843-4690-8d52-4294342ed458",
+      "name": "Check Email Not Sent",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1456,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1BEmfDHSCmMsuWT38tFSCuMbHTDwp391VgeriFGeU2HY"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1079604647"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email Sent": "YES",
+            "row_number": "={{ $('Prepare Student Data').item.json.row_number }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Email Sent",
+              "displayName": "Email Sent",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dd74076d-addd-486c-b7a8-7d72323fd4c2",
+      "name": "Mark Email Sent - Document Pending",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -432,
+        320
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uwHsIlkrsBTvOvL2",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1BEmfDHSCmMsuWT38tFSCuMbHTDwp391VgeriFGeU2HY"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1079604647"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email Sent": "YES",
+            "row_number": "={{ $('Prepare Student Data').item.json.row_number }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Email Sent",
+              "displayName": "Email Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c5909e57-5734-4c26-84ff-a7f59573c8ff",
+      "name": "Mark Email Sent - Institute Verification",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -432,
+        512
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uwHsIlkrsBTvOvL2",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1BEmfDHSCmMsuWT38tFSCuMbHTDwp391VgeriFGeU2HY"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1079604647"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email Sent": "YES",
+            "row_number": "={{ $('Prepare Student Data').item.json.row_number }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Email Sent",
+              "displayName": "Email Sent",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "15dbf53d-a146-4d6c-87ab-2835e82e205c",
+      "name": "Mark Email Sent - Approved",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -432,
+        704
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uwHsIlkrsBTvOvL2",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gpt-4o-mini"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are an AI assistant for a college scholarship office. Write a professional, polite email (max 80 words) for a student whose scholarship application is pending document submission.\n\nStudent Name: {{ $('Prepare Student Data').item.json.name }}\nScholarship Type: {{ $('Prepare Student Data').item.json.scholarship_type }}\nApplication Status: Document Pending\n\nRules:\n- Friendly but formal tone\n- Clearly state which documents are needed\n- Provide clear next steps\n- No emojis\n- Return ONLY a valid JSON object with exactly this structure: {\"subject\": \"your subject here\", \"body\": \"your email body here\"}\n- Do not include any markdown formatting, code blocks, or extra text"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_object"
+            }
+          }
+        }
+      },
+      "id": "7e1625ee-8c45-4bb5-bec4-883414ec77e5",
+      "name": "Generate Document Pending Email",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -1008,
+        320
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "oUZZFfkAlfJusUCk",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gpt-4o-mini"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are an AI assistant for a college scholarship office. Write a professional email (max 80 words) to notify the institute admin that a student's scholarship application requires verification.\n\nStudent Name: {{ $('Prepare Student Data').item.json.name }}\nScholarship Type: {{ $('Prepare Student Data').item.json.scholarship_type }}\nApplication Status: Institute Verification Pending\n\nRules:\n- Professional and formal tone\n- Request verification of student enrollment and academic standing\n- Provide clear action items\n- No emojis\n- Return ONLY a valid JSON object with exactly this structure: {\"subject\": \"your subject here\", \"body\": \"your email body here\"}\n- Do not include any markdown formatting, code blocks, or extra text"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_object"
+            }
+          }
+        }
+      },
+      "id": "1b50db28-ce8c-4b6b-8b99-a496c17e5870",
+      "name": "Generate Institute Verification Email",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -1008,
+        512
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "oUZZFfkAlfJusUCk",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gpt-4o-mini"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are an AI assistant for a college scholarship office. Write a congratulatory email (max 80 words) to inform a student that their scholarship application has been approved.\n\nStudent Name: {{ $('Prepare Student Data').item.json.name }}\nScholarship Type: {{ $('Prepare Student Data').item.json.scholarship_type }}\nApplication Status: Approved\n\nRules:\n- Warm and congratulatory tone\n- Mention next steps for receiving the scholarship\n- Professional but celebratory\n- No emojis\n- Return ONLY a valid JSON object with exactly this structure: {\"subject\": \"your subject here\", \"body\": \"your email body here\"}\n- Do not include any markdown formatting, code blocks, or extra text"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_object"
+            }
+          }
+        }
+      },
+      "id": "59e7845b-4126-4385-a26f-019e8713d252",
+      "name": "Generate Approved Email",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -1008,
+        704
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "oUZZFfkAlfJusUCk",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "New Scholarship Application": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Prepare Student Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Scholarship Status": {
+      "main": [
+        [
+          {
+            "node": "Generate Document Pending Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Generate Institute Verification Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Generate Approved Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Student Data": {
+      "main": [
+        [
+          {
+            "node": "Check Email Not Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Email Not Sent": {
+      "main": [
+        [
+          {
+            "node": "Route by Scholarship Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Student Email": {
+      "main": [
+        [
+          {
+            "node": "Mark Email Sent - Document Pending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Admin Email": {
+      "main": [
+        [
+          {
+            "node": "Mark Email Sent - Institute Verification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Approval Email": {
+      "main": [
+        [
+          {
+            "node": "Mark Email Sent - Approved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Document Pending Email": {
+      "main": [
+        [
+          {
+            "node": "Send Student Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Institute Verification Email": {
+      "main": [
+        [
+          {
+            "node": "Send Admin Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Approved Email": {
+      "main": [
+        [
+          {
+            "node": "Send Approval Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "0b9090bd-f41c-4e88-b3bd-e96b4ef3bad9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8a0df9b2afc096e61a16c619c82ca996a7619bbb7eb12e684156d779cd9da654"
+  },
+  "id": "68uIO8PFTMNAPFfn",
+  "tags": []
+}
